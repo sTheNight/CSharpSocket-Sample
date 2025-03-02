@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace SocketServe
 {
@@ -19,7 +14,7 @@ namespace SocketServe
          * 所有非主线程逻辑均改为异步执行并增加服务端发送消息的 Task
          * 
          */
-        public static Dictionary<Socket,string> clients = new Dictionary<Socket, string>();
+        private static Dictionary<Socket,string> clients = new Dictionary<Socket, string>();
         private static Socket Server;
         public static void Main(string[] args)
         {
@@ -43,7 +38,7 @@ ProtocolType: {Server.ProtocolType}
                 }
             }
         }
-        public static async Task SendMsgByServer() // 服务端发送消息的 Task
+        private static async Task SendMsgByServer() // 服务端发送消息的 Task
         {
             while (true)
             {
@@ -51,7 +46,7 @@ ProtocolType: {Server.ProtocolType}
                 await Task.Run(() => Boardcast($"Server:{msg}", null)); // 通过调用广播消息的 Task 实现服务端发送消息，防止重复造轮子
             }
         }
-        public static async Task ReceiveMsg(Socket client) // 从客户端接收消息的 Task
+        private static async Task ReceiveMsg(Socket client) // 从客户端接收消息的 Task
         {
             byte[] buffer = new byte[1024];
             try
@@ -82,7 +77,7 @@ ProtocolType: {Server.ProtocolType}
                 clients.Remove(client);
             }
         }
-        public static async Task Boardcast(string message,Socket sender) // 广播消息的Task
+        private static async Task Boardcast(string message,Socket sender) // 广播消息的Task
         {
             try
             {

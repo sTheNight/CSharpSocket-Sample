@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Net;
+﻿using System.Text;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace SocketClient
 {
@@ -21,13 +14,14 @@ namespace SocketClient
          * 
          */
         private static Socket Client;
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            // 创建客户端 Socket 实例
             Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
+            // 连接服务端
             Connect();
-
-            Console.Write("已连接服务端，请注册昵称：");
+            // 向服务端提交此客户端的昵称
+            Console.Write("已连接服务端，请输入您的昵称：");
             string name = Console.ReadLine();
             try
             {
@@ -38,9 +32,10 @@ namespace SocketClient
                 // 若出现错误则说明连接已断开
                 Client.Close();
             }
-
+            // 启动接收消息和发送消息的异步 Task
             Task receiveTask =  Task.Run(() => ReceiveMsg());
             Task sendTask = Task.Run(() => SendMsg());
+
             while (true)
             {
                 if (!Client.Connected || receiveTask.IsCanceled || sendTask.IsCanceled)
@@ -54,6 +49,11 @@ namespace SocketClient
         {
             try
             {
+                if (Client == null)
+                {
+                    Console.WriteLine("客户端启动失败");
+                    return;
+                }
                 Client.Connect("127.0.0.1", 12345);
             }
             catch (Exception)
@@ -62,7 +62,7 @@ namespace SocketClient
                 Connect();
             }
         }
-        public static async Task ReceiveMsg()
+        private static async Task ReceiveMsg()
         {
             byte[] buffer = new byte[1024];
             try
@@ -82,11 +82,11 @@ namespace SocketClient
                 Client.Close();
             }
         }
-        public static async Task SendMsg()
+        private static async Task SendMsg()
         {
             try
             {
-                while (true) //发送消息的逻辑运行在主线程上否则程序会直接退出
+                while (true)
                 {
                     string msg = Console.ReadLine();
                     Task.Run(() => Client.Send(Encoding.UTF8.GetBytes(msg)));
