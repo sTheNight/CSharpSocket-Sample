@@ -44,9 +44,7 @@ namespace SocketServer_Winform
             }
             AppentMsgText_Fast($@"服务端已启动，等待客户端连接...");
 
-            Thread AcceptThread = new Thread(AcceptClient);
-            AcceptThread.IsBackground = true;
-            AcceptThread.Start();
+            Task.Run(() => AcceptClient());
         }
         private static void AcceptClient()
         {
@@ -54,7 +52,7 @@ namespace SocketServer_Winform
             {
                 Socket client = Server.Accept(); // 阻塞等待客户端连接
                 AppentMsgText_Fast($"监听到新的用户尝试连接：{client.RemoteEndPoint}");
-                _ = Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
+                Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
             }
         }
         private static async void ReceiveMsg(Socket client) // 从客户端接收消息的 Task
