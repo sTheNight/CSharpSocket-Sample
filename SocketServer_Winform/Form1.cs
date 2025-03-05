@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Net;
 using static System.Net.Mime.MediaTypeNames;
 using System.Reflection.Emit;
+using System.Threading;
 
 namespace SocketServer_Winform
 {
@@ -43,18 +44,20 @@ namespace SocketServer_Winform
             }
             AppentMsgText_Fast($@"服务端已启动，等待客户端连接...");
 
-            Task.Run(() => AcceptClient());
+            Thread AcceptThread = new Thread(AcceptClient);
+            AcceptThread.IsBackground = true;
+            AcceptThread.Start();
         }
-        private static async Task AcceptClient()
+        private static void AcceptClient()
         {
             while (true)
             {
                 Socket client = Server.Accept(); // 阻塞等待客户端连接
                 AppentMsgText_Fast($"监听到新的用户尝试连接：{client.RemoteEndPoint}");
-                Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
+                _ = Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
             }
         }
-        private static async Task ReceiveMsg(Socket client) // 从客户端接收消息的 Task
+        private static async void ReceiveMsg(Socket client) // 从客户端接收消息的 Task
         {
             byte[] buffer = new byte[1024];
             try
@@ -62,8 +65,8 @@ namespace SocketServer_Winform
                 // 新用户第一条消息必定是注册昵称，因此单独处理
                 int userName_num = client.Receive(buffer);
                 clients.Add(client, Encoding.UTF8.GetString(buffer, 0, userName_num));
-                AppentMsgText_Fast(clients[client] + "已注册");
-                Task.Run(() => Boardcast($"{clients[client]}已注册", client)); // 广播消息，异步执行防止阻塞线程
+                AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已注册");
+                await Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]})已注册", client)); // 广播消息，异步执行防止阻塞线程
 
                 while (true)
                 {
@@ -72,16 +75,16 @@ namespace SocketServer_Winform
                     if (num == 0) // num 为 0 说明客户端已断开连接
                         break;
                     string message = Encoding.UTF8.GetString(buffer, 0, num);
-                    AppentMsgText_Fast($"{clients[client]}:{message}");
-                    Task.Run(() => Boardcast($"{clients[client]}:{message}", client)); // 广播消息，异步执行防止阻塞线程
+                    AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{message}");
+                    await Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]}):{message}", client)); // 广播消息，异步执行防止阻塞线程
                 }
             }
             catch (Exception ex)
             {
                 // 客户端异常断开连接
-                AppentMsgText_Fast($"{clients[client]}:{ex.Message}");
-                AppentMsgText_Fast($"{clients[client]}已离开");
-                Boardcast($"{clients[client]}已离开", client);
+                AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{ex.Message}");
+                AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已离开");
+                await Boardcast($"{client.RemoteEndPoint}({clients[client]})已离开", client);
                 clients.Remove(client);
             }
         }
@@ -93,12 +96,12 @@ namespace SocketServer_Winform
                 foreach (var client in clients.Keys)
                 {
                     if (client != sender)
-                        client.Send(buffer);
+                        await Task.Run(() => client.Send(buffer));
                 }
             }
             catch (Exception ex)
             {
-                AppentMsgText_Fast($"广播失败：{ex.Message}");
+                AppentMsgText_Fast($"广播失败：{ex.Message}({sender.RemoteEndPoint})");
             }
         }
         private async void materialRaisedButton1_Click(object sender, EventArgs e)
@@ -106,6 +109,7 @@ namespace SocketServer_Winform
             string msg = materialSingleLineTextField1.Text;
             AppentMsgText_Fast(msg);
             materialSingleLineTextField1.Text = "";
+            materialSingleLineTextField1.Focus();
             await Task.Run(() => Boardcast($"Server:{msg}", null));
         }
         // 由于无法跨线程操作控件，因此使用委托代理控件操作
@@ -143,13 +147,11 @@ namespace SocketServer_Winform
                 materialFlatButton1.Enabled = true;
                 materialFlatButton3.Enabled = true;
                 materialFlatButton2.Text = "Stop";
+                return;
             }
-            else
-            {
-                // 关闭服务端，由于停止 Task 较为麻烦，因此直接重启程序
-                System.Diagnostics.Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                Environment.Exit(0);
-            }
+            // 关闭服务端，由于停止 Task 较为麻烦，因此直接重启程序
+            System.Diagnostics.Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            Environment.Exit(0);
         }
         private void materialFlatButton1_Click(object sender, EventArgs e)
         {
@@ -159,7 +161,9 @@ namespace SocketServer_Winform
 AddressFamily: {Server.AddressFamily}
 SocketType: {Server.SocketType}
 ProtocolType: {Server.ProtocolType}");
+                return;
             }
+            MessageBox.Show("服务端未启动");
         }
         private void materialFlatButton3_Click(object sender, EventArgs e)
         {
