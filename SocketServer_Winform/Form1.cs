@@ -46,16 +46,17 @@ namespace SocketServer_Winform
 
             Task.Run(() => AcceptClient());
         }
-        private static void AcceptClient()
+        private static async Task AcceptClient() // 接受客户端连接的 Task，需要使用 await 关键字因此是 async 方法
         {
             while (true)
             {
-                Socket client = Server.Accept(); // 阻塞等待客户端连接
+
+                Socket client = await Server.AcceptAsync(); // 等待客户端连接
                 AppentMsgText_Fast($"监听到新的用户尝试连接：{client.RemoteEndPoint}");
-                Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
+                _ = Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
             }
         }
-        private static async void ReceiveMsg(Socket client) // 从客户端接收消息的 Task
+        private static async Task ReceiveMsg(Socket client) // 从客户端接收消息的 Task，需要使用 await 关键字因此是 async 方法
         {
             byte[] buffer = new byte[1024];
             try
@@ -64,7 +65,7 @@ namespace SocketServer_Winform
                 int userName_num = client.Receive(buffer);
                 clients.Add(client, Encoding.UTF8.GetString(buffer, 0, userName_num));
                 AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已注册");
-                await Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]})已注册", client)); // 广播消息，异步执行防止阻塞线程
+                _ = Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]})已注册", client)); // 广播消息，异步执行防止阻塞线程
 
                 while (true)
                 {
@@ -74,7 +75,7 @@ namespace SocketServer_Winform
                         break;
                     string message = Encoding.UTF8.GetString(buffer, 0, num);
                     AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{message}");
-                    await Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]}):{message}", client)); // 广播消息，异步执行防止阻塞线程
+                    _ = Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]}):{message}", client)); // 广播消息，异步执行防止阻塞线程
                 }
             }
             catch (Exception ex)
@@ -82,11 +83,11 @@ namespace SocketServer_Winform
                 // 客户端异常断开连接
                 AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{ex.Message}");
                 AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已离开");
-                await Boardcast($"{client.RemoteEndPoint}({clients[client]})已离开", client);
+                await Boardcast($"{client.RemoteEndPoint}({clients[client]})已离开", client);// 需等待广播完成否则会出现异常
                 clients.Remove(client);
             }
         }
-        private static async Task Boardcast(string message, Socket sender) // 广播消息的Task
+        private static async Task Boardcast(string message, Socket sender) // 广播消息的Task，由于部分场景需要等待广播完成因此是 async 方法
         {
             try
             {
@@ -94,7 +95,7 @@ namespace SocketServer_Winform
                 foreach (var client in clients.Keys)
                 {
                     if (client != sender)
-                        await Task.Run(() => client.Send(buffer));
+                        _ =  Task.Run(() => client.Send(buffer));
                 }
             }
             catch (Exception ex)
@@ -102,13 +103,13 @@ namespace SocketServer_Winform
                 AppentMsgText_Fast($"广播失败：{ex.Message}({sender.RemoteEndPoint})");
             }
         }
-        private async void materialRaisedButton1_Click(object sender, EventArgs e)
+        private void materialRaisedButton1_Click(object sender, EventArgs e)
         {
             string msg = materialSingleLineTextField1.Text;
             AppentMsgText_Fast(msg);
             materialSingleLineTextField1.Text = "";
             materialSingleLineTextField1.Focus();
-            await Task.Run(() => Boardcast($"Server:{msg}", null));
+            _ = Task.Run(() => Boardcast($"Server:{msg}", null));
         }
         // 由于无法跨线程操作控件，因此使用委托代理控件操作
         internal static void AppentMsgText(string msg)

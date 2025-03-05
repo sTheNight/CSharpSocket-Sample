@@ -5,14 +5,6 @@ namespace SocketClient
 {
     internal class Program
     {
-        /**
-         * 
-         * 借鉴自此处：https://www.bilibili.com/video/BV1DuxhetEMy/?share_source=copy_web&vd_source=ded938f96ab6f358803f5b6e194589b5
-         * 
-         * 完善了连接失败的逻辑，增加了重连机制
-         * 将部分方法改为异步执行
-         * 
-         */
         private static Socket Client;
         public static void Main(string[] args)
         {
@@ -22,7 +14,12 @@ namespace SocketClient
             Connect();
             // 向服务端提交此客户端的昵称
             Console.Write("已连接服务端，请输入您的昵称：");
-            string name = Console.ReadLine();
+        input_name: string name = Console.ReadLine();
+            if (name=="")
+            {
+                Console.Write("昵称不得为空，请重新输入：");
+                goto input_name;
+            }
             try
             {
                 Client.Send(Encoding.UTF8.GetBytes(name));
@@ -35,7 +32,7 @@ namespace SocketClient
             // 启动接收消息和发送消息的异步 Task
             Task receiveTask =  Task.Run(() => ReceiveMsg());
             Task sendTask = Task.Run(() => SendMsg());
-
+            Console.WriteLine("连接成功！");
             while (true)
             {
                 if (!Client.Connected || receiveTask.IsCanceled || sendTask.IsCanceled)
@@ -62,7 +59,7 @@ namespace SocketClient
                 Connect();
             }
         }
-        private static async Task ReceiveMsg()
+        private static void ReceiveMsg()
         {
             byte[] buffer = new byte[1024];
             try
@@ -82,14 +79,14 @@ namespace SocketClient
                 Client.Close();
             }
         }
-        private static async Task SendMsg()
+        private static void SendMsg()
         {
             try
             {
                 while (true)
                 {
                     string msg = Console.ReadLine();
-                    Task.Run(() => Client.Send(Encoding.UTF8.GetBytes(msg)));
+                    _ = Task.Run(() => Client.Send(Encoding.UTF8.GetBytes(msg)));
                 }
             }
             catch (Exception ex)
