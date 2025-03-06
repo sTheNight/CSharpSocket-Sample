@@ -172,6 +172,7 @@
             this.materialFlatButton2.TabIndex = 8;
             this.materialFlatButton2.Text = "Info";
             this.materialFlatButton2.UseVisualStyleBackColor = true;
+            this.materialFlatButton2.Click += new System.EventHandler(this.materialFlatButton2_Click);
             // 
             // ClientForm
             // 

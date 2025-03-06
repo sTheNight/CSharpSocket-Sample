@@ -113,38 +113,48 @@ namespace SocketClient_Winform
 
         private async void materialFlatButton1_Click(object sender, EventArgs e)
         {
-            msgTextBox.Clear();
-            AppentMsgText_Fast("正在尝试连接服务端...");
-            try
+            if (Client==null)
             {
-                int port = int.Parse(portTextBox.Text);
-                if (port < 0 || port > 65535)
+                msgTextBox.Clear();
+                AppentMsgText_Fast("正在尝试连接服务端...");
+                try
                 {
-                    AppentMsgText_Fast("端口号范围错误");
-                    return;
+                    int port = int.Parse(portTextBox.Text);
+                    if (port < 0 || port > 65535)
+                    {
+                        AppentMsgText_Fast("端口号范围错误");
+                        return;
+                    }
+                    if (addressTextBox.Text == "")
+                    {
+                        AppentMsgText_Fast("IP地址为空");
+                        return;
+                    }
+                    if (await Connect(addressTextBox.Text, port))
+                    {
+                        materialSingleLineTextField1.Enabled = true;
+                        materialRaisedButton1.Enabled = true;
+                        materialFlatButton2.Enabled = true;
+                        materialSingleLineTextField2.Enabled = false;
+                        materialSingleLineTextField3.Enabled = false;
+                        materialSingleLineTextField1.Focus();
+                        materialSingleLineTextField1.Hint = "Please enter your nickname";
+                        AppentMsgText_Fast("已连接服务端，等待输入昵称...");
+                        materialFlatButton1.Text = "Disconnect";
+                        return;
+                    }
+                    Client.Close();
+                    Client = null;
                 }
-                if (addressTextBox.Text == "")
+                catch (Exception ex)
                 {
-                    AppentMsgText_Fast("IP地址为空");
-                    return;
-                }
-                if (await Connect(addressTextBox.Text, port))
-                {
-                    materialSingleLineTextField1.Enabled = true;
-                    materialRaisedButton1.Enabled = true;
-                    materialFlatButton2.Enabled = true;
-                    materialSingleLineTextField2.Enabled = false;
-                    materialSingleLineTextField3.Enabled = false;
-                    materialSingleLineTextField1.Focus();
-                    materialSingleLineTextField1.Hint = "Please enter your nickname";
-                    AppentMsgText_Fast("已连接服务端，等待输入昵称...");
+                    AppentMsgText_Fast(ex.Message);
                     return;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                AppentMsgText_Fast(ex.Message);
-                return;
+                RestartClient();
             }
         }
 
@@ -177,6 +187,15 @@ namespace SocketClient_Winform
             AppentMsgText_Fast($"You:{materialSingleLineTextField1.Text}");
             materialSingleLineTextField1.Text = "";
             materialSingleLineTextField1.Focus();
+        }
+
+        private void materialFlatButton2_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show($@"Local EndPoint: {Client.LocalEndPoint}
+Remote EndPoint: {Client.RemoteEndPoint}
+AddressFamily: {Client.AddressFamily}
+SocketType: {Client.SocketType}
+ProtocolType: {Client.ProtocolType}");
         }
     }
 }
