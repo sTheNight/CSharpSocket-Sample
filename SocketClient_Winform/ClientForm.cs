@@ -37,7 +37,7 @@ namespace SocketClient_Winform
             addressTextBox = materialSingleLineTextField2;
             portTextBox = materialSingleLineTextField3;
 
-            AppentMsgText_Fast("客户端未启动");
+            AppentMsgText_Fast("未连接到服务端");
         }
         private static async Task<bool> Connect(string ip, int port)
         {

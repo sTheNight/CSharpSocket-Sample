@@ -36,7 +36,7 @@ namespace SocketServer_Winform
 
             msgTextBox = textBox1;
             portTextBox = materialSingleLineTextField2;
-            msgTextBox.Text = "服务端未启动";
+            AppentMsgText_Fast("服务端未启动");
         }
         public static bool StartServer()
         {
