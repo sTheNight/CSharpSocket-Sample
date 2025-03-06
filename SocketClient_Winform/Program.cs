@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SocketServer_Winform
+namespace SocketClient_Winform
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace SocketServer_Winform
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ServerForm());
+            Application.Run(new ClientForm());
         }
     }
 }

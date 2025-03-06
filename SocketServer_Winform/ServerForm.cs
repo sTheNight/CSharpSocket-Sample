@@ -13,14 +13,21 @@ using System.Threading;
 
 namespace SocketServer_Winform
 {
-    public partial class Form1 : MaterialSkin.Controls.MaterialForm
+    public partial class ServerForm : MaterialSkin.Controls.MaterialForm
     {
         private static Dictionary<Socket, string> clients = new Dictionary<Socket, string>();
         private static Socket Server;
         internal static TextBox msgTextBox;
-        public Form1()
+        public static MaterialSingleLineTextField portTextBox;
+
+        public static int width;
+        public static int height;
+        public ServerForm()
         {
             InitializeComponent();
+
+            width = this.Width;
+            height = this.Height;
 
             var materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
@@ -28,23 +35,36 @@ namespace SocketServer_Winform
             materialSkinManager.ColorScheme = new ColorScheme(Primary.BlueGrey800, Primary.BlueGrey900, Primary.BlueGrey500, Accent.LightBlue200, TextShade.WHITE);
 
             msgTextBox = textBox1;
+            portTextBox = materialSingleLineTextField2;
             msgTextBox.Text = "服务端未启动";
         }
-        public static void StartServer()
+        public static bool StartServer()
         {
             Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
-                Server.Bind(new IPEndPoint(IPAddress.Any, 12345));
+                int port = int.Parse(portTextBox.Text);
+                Server.Bind(new IPEndPoint(IPAddress.Any, port));
                 Server.Listen(10);
+            }
+            catch(ArgumentException) 
+            {
+                AppentMsgText_Fast("端口号不能为空");
+                return false;
+            }
+            catch (FormatException)
+            {
+                AppentMsgText_Fast("端口号格式错误");
+                return false;
             }
             catch (Exception ex)
             {
-                msgTextBox.AppendText(ex.Message);
+                AppentMsgText_Fast(ex.Message);
+                return false;
             }
             AppentMsgText_Fast($@"服务端已启动，等待客户端连接...");
-
             Task.Run(() => AcceptClient());
+            return true;
         }
         private static async Task AcceptClient() // 接受客户端连接的 Task，需要使用 await 关键字因此是 async 方法
         {
@@ -134,18 +154,26 @@ namespace SocketServer_Winform
         // 锁定布局大小，实现方式较粗糙
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            this.ClientSize = new System.Drawing.Size(529, 407);
+            this.ClientSize = new System.Drawing.Size(width, height);
         }
 
         private void materialFlatButton2_Click(object sender, EventArgs e)
         {
-            if (Server == null)
+            if (Server == null) // 若 Server 未实例化则说明服务端未启动
             {
                 textBox1.Clear();
-                StartServer();
-                materialFlatButton1.Enabled = true;
-                materialFlatButton3.Enabled = true;
-                materialFlatButton2.Text = "Stop";
+                if (StartServer()) // 判断服务端是否启动成功
+                {
+                    materialFlatButton1.Enabled = true;
+                    materialFlatButton3.Enabled = true;
+                    materialSingleLineTextField1.Enabled = true;
+                    materialSingleLineTextField2.Enabled = false;
+                    materialRaisedButton1.Enabled = true;
+                    materialFlatButton2.Text = "Stop";
+                    return;
+                }
+                Server.Close();
+                Server = null;
                 return;
             }
             // 关闭服务端，由于停止 Task 较为麻烦，因此直接重启程序

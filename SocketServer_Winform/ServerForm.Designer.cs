@@ -1,6 +1,6 @@
 ﻿namespace SocketServer_Winform
 {
-    partial class Form1
+    partial class ServerForm
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -28,26 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.materialContextMenuStrip1 = new MaterialSkin.Controls.MaterialContextMenuStrip();
             this.materialSingleLineTextField1 = new MaterialSkin.Controls.MaterialSingleLineTextField();
             this.materialRaisedButton1 = new MaterialSkin.Controls.MaterialRaisedButton();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.materialFlatButton1 = new MaterialSkin.Controls.MaterialFlatButton();
             this.materialFlatButton2 = new MaterialSkin.Controls.MaterialFlatButton();
             this.materialFlatButton3 = new MaterialSkin.Controls.MaterialFlatButton();
+            this.materialSingleLineTextField2 = new MaterialSkin.Controls.MaterialSingleLineTextField();
+            this.materialLabel1 = new MaterialSkin.Controls.MaterialLabel();
             this.SuspendLayout();
-            // 
-            // materialContextMenuStrip1
-            // 
-            this.materialContextMenuStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.materialContextMenuStrip1.Depth = 0;
-            this.materialContextMenuStrip1.MouseState = MaterialSkin.MouseState.HOVER;
-            this.materialContextMenuStrip1.Name = "materialContextMenuStrip1";
-            this.materialContextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // materialSingleLineTextField1
             // 
             this.materialSingleLineTextField1.Depth = 0;
+            this.materialSingleLineTextField1.Enabled = false;
             this.materialSingleLineTextField1.Hint = "Please enter message";
             this.materialSingleLineTextField1.Location = new System.Drawing.Point(12, 77);
             this.materialSingleLineTextField1.MouseState = MaterialSkin.MouseState.HOVER;
@@ -63,6 +57,7 @@
             // materialRaisedButton1
             // 
             this.materialRaisedButton1.Depth = 0;
+            this.materialRaisedButton1.Enabled = false;
             this.materialRaisedButton1.Location = new System.Drawing.Point(335, 77);
             this.materialRaisedButton1.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialRaisedButton1.Name = "materialRaisedButton1";
@@ -90,7 +85,7 @@
             this.materialFlatButton1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.materialFlatButton1.Depth = 0;
             this.materialFlatButton1.Enabled = false;
-            this.materialFlatButton1.Location = new System.Drawing.Point(417, 125);
+            this.materialFlatButton1.Location = new System.Drawing.Point(417, 157);
             this.materialFlatButton1.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialFlatButton1.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialFlatButton1.Name = "materialFlatButton1";
@@ -106,7 +101,7 @@
             this.materialFlatButton2.AutoSize = true;
             this.materialFlatButton2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.materialFlatButton2.Depth = 0;
-            this.materialFlatButton2.Location = new System.Drawing.Point(417, 77);
+            this.materialFlatButton2.Location = new System.Drawing.Point(417, 109);
             this.materialFlatButton2.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialFlatButton2.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialFlatButton2.Name = "materialFlatButton2";
@@ -123,7 +118,7 @@
             this.materialFlatButton3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.materialFlatButton3.Depth = 0;
             this.materialFlatButton3.Enabled = false;
-            this.materialFlatButton3.Location = new System.Drawing.Point(417, 173);
+            this.materialFlatButton3.Location = new System.Drawing.Point(415, 205);
             this.materialFlatButton3.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.materialFlatButton3.MouseState = MaterialSkin.MouseState.HOVER;
             this.materialFlatButton3.Name = "materialFlatButton3";
@@ -134,19 +129,50 @@
             this.materialFlatButton3.UseVisualStyleBackColor = true;
             this.materialFlatButton3.Click += new System.EventHandler(this.materialFlatButton3_Click);
             // 
-            // Form1
+            // materialSingleLineTextField2
+            // 
+            this.materialSingleLineTextField2.Depth = 0;
+            this.materialSingleLineTextField2.Hint = "12345";
+            this.materialSingleLineTextField2.Location = new System.Drawing.Point(459, 77);
+            this.materialSingleLineTextField2.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialSingleLineTextField2.Name = "materialSingleLineTextField2";
+            this.materialSingleLineTextField2.PasswordChar = '\0';
+            this.materialSingleLineTextField2.SelectedText = "";
+            this.materialSingleLineTextField2.SelectionLength = 0;
+            this.materialSingleLineTextField2.SelectionStart = 0;
+            this.materialSingleLineTextField2.Size = new System.Drawing.Size(54, 23);
+            this.materialSingleLineTextField2.TabIndex = 9;
+            this.materialSingleLineTextField2.Text = "12345";
+            this.materialSingleLineTextField2.UseSystemPasswordChar = false;
+            // 
+            // materialLabel1
+            // 
+            this.materialLabel1.AutoSize = true;
+            this.materialLabel1.Depth = 0;
+            this.materialLabel1.Font = new System.Drawing.Font("Roboto", 11F);
+            this.materialLabel1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.materialLabel1.Location = new System.Drawing.Point(416, 77);
+            this.materialLabel1.MouseState = MaterialSkin.MouseState.HOVER;
+            this.materialLabel1.Name = "materialLabel1";
+            this.materialLabel1.Size = new System.Drawing.Size(41, 19);
+            this.materialLabel1.TabIndex = 10;
+            this.materialLabel1.Text = "Port:";
+            // 
+            // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(529, 407);
+            this.ClientSize = new System.Drawing.Size(528, 407);
+            this.Controls.Add(this.materialLabel1);
+            this.Controls.Add(this.materialSingleLineTextField2);
             this.Controls.Add(this.materialFlatButton3);
             this.Controls.Add(this.materialFlatButton2);
             this.Controls.Add(this.materialFlatButton1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.materialRaisedButton1);
             this.Controls.Add(this.materialSingleLineTextField1);
-            this.Name = "Form1";
+            this.Name = "ServerForm";
             this.Text = "Socket Server";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.ResumeLayout(false);
@@ -155,13 +181,14 @@
         }
 
         #endregion
-        private MaterialSkin.Controls.MaterialContextMenuStrip materialContextMenuStrip1;
         private MaterialSkin.Controls.MaterialSingleLineTextField materialSingleLineTextField1;
         private MaterialSkin.Controls.MaterialRaisedButton materialRaisedButton1;
         private System.Windows.Forms.TextBox textBox1;
         private MaterialSkin.Controls.MaterialFlatButton materialFlatButton1;
         private MaterialSkin.Controls.MaterialFlatButton materialFlatButton2;
         private MaterialSkin.Controls.MaterialFlatButton materialFlatButton3;
+        private MaterialSkin.Controls.MaterialSingleLineTextField materialSingleLineTextField2;
+        private MaterialSkin.Controls.MaterialLabel materialLabel1;
     }
 }
 
