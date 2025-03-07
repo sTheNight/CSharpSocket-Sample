@@ -7,9 +7,7 @@ using MaterialSkin.Controls;
 using MaterialSkin;
 using System.Net.Sockets;
 using System.Net;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection.Emit;
-using System.Threading;
+using Application = System.Windows.Forms.Application;
 
 namespace SocketServer_Winform
 {
@@ -25,21 +23,22 @@ namespace SocketServer_Winform
         public ServerForm()
         {
             InitializeComponent();
-
+            // 初始化变量及 MaterialSkin
             width = this.Width;
             height = this.Height;
+            msgTextBox = textBox1;
+            portTextBox = materialSingleLineTextField2;
 
             var materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
             materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;
             materialSkinManager.ColorScheme = new ColorScheme(Primary.BlueGrey800, Primary.BlueGrey900, Primary.BlueGrey500, Accent.LightBlue200, TextShade.WHITE);
 
-            msgTextBox = textBox1;
-            portTextBox = materialSingleLineTextField2;
             AppendMsgText_Fast("服务端未启动");
         }
         public static bool StartServer()
         {
+            // 创建服务端 Socket 实例
             Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -123,19 +122,12 @@ namespace SocketServer_Winform
                 AppendMsgText_Fast($"广播失败：{ex.Message}({sender.RemoteEndPoint})");
             }
         }
-        private void materialRaisedButton1_Click(object sender, EventArgs e)
-        {
-            string msg = materialSingleLineTextField1.Text;
-            AppendMsgText_Fast(msg);
-            materialSingleLineTextField1.Text = "";
-            materialSingleLineTextField1.Focus();
-            _ = Task.Run(() => Boardcast($"Server:{msg}", null));
-        }
         // 由于无法跨线程操作控件，因此使用委托代理控件操作
         internal static void AppendMsgText(string msg)
         {
             if (msgTextBox.InvokeRequired)
             {
+                // 倘若当前处在 UI 线程之外，则使用 Invoke 方法将操作委托到 UI 线程
                 msgTextBox.Invoke(new Action(() =>
                 {
                     msgTextBox.AppendText(msg + "\r\n");
@@ -157,6 +149,13 @@ namespace SocketServer_Winform
             this.ClientSize = new System.Drawing.Size(width, height);
         }
 
+        /**
+         * 
+         *  控件事件区
+         *  
+         */
+
+        // 启动/停止服务端按钮的方法
         private void materialFlatButton2_Click(object sender, EventArgs e)
         {
             if (Server == null) // 若 Server 未实例化则说明服务端未启动
@@ -177,9 +176,10 @@ namespace SocketServer_Winform
                 return;
             }
             // 关闭服务端，由于停止 Task 较为麻烦，因此直接重启程序
-            System.Diagnostics.Process.Start(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            Environment.Exit(0);
+            Application.Restart();
+
         }
+        // 查看服务端信息按钮的方法
         private void materialFlatButton1_Click(object sender, EventArgs e)
         {
             if (Server != null)
@@ -192,6 +192,7 @@ ProtocolType: {Server.ProtocolType}");
             }
             MessageBox.Show("服务端未启动");
         }
+        // 查看用户信息按钮的方法
         private void materialFlatButton3_Click(object sender, EventArgs e)
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -201,6 +202,16 @@ ProtocolType: {Server.ProtocolType}");
             }
             // 可爱的三元表达式
             MessageBox.Show(stringBuilder.ToString() == "" ? "未找到用户" : $"{stringBuilder.ToString()}");
+        }
+        // 发送消息按钮的方法
+        private void materialRaisedButton1_Click(object sender, EventArgs e)
+        {
+            string msg = materialSingleLineTextField1.Text;
+            AppendMsgText_Fast(msg);
+            materialSingleLineTextField1.Text = "";
+            materialSingleLineTextField1.Focus();
+            // 使用广播方法来发送信息，以免重复造轮子
+            _ = Task.Run(() => Boardcast($"Server:{msg}", null));
         }
     }
 }
