@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServer_Winfoorm", "SocketServer_Winform\SocketServer_Winfoorm.csproj", "{9B45311C-59BB-42C5-A803-DF102F5D03F4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServer_Winform", "SocketServer_Winform\SocketServer_Winform.csproj", "{9B45311C-59BB-42C5-A803-DF102F5D03F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketClient_Winform", "SocketClient_Winform\SocketClient_Winform.csproj", "{55A36B83-50EF-44BE-B2F6-1E9092B6F10C}"
 EndProject

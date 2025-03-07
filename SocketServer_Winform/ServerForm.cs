@@ -36,7 +36,7 @@ namespace SocketServer_Winform
 
             msgTextBox = textBox1;
             portTextBox = materialSingleLineTextField2;
-            AppentMsgText_Fast("服务端未启动");
+            AppendMsgText_Fast("服务端未启动");
         }
         public static bool StartServer()
         {
@@ -49,20 +49,20 @@ namespace SocketServer_Winform
             }
             catch(ArgumentException) 
             {
-                AppentMsgText_Fast("端口号不能为空");
+                AppendMsgText_Fast("端口号不能为空");
                 return false;
             }
             catch (FormatException)
             {
-                AppentMsgText_Fast("端口号格式错误");
+                AppendMsgText_Fast("端口号格式错误");
                 return false;
             }
             catch (Exception ex)
             {
-                AppentMsgText_Fast(ex.Message);
+                AppendMsgText_Fast(ex.Message);
                 return false;
             }
-            AppentMsgText_Fast($@"服务端已启动，等待客户端连接...");
+            AppendMsgText_Fast($@"服务端已启动，等待客户端连接...");
             Task.Run(() => AcceptClient());
             return true;
         }
@@ -72,7 +72,7 @@ namespace SocketServer_Winform
             {
 
                 Socket client = await Server.AcceptAsync(); // 等待客户端连接
-                AppentMsgText_Fast($"监听到新的用户尝试连接：{client.RemoteEndPoint}");
+                AppendMsgText_Fast($"监听到新的用户尝试连接：{client.RemoteEndPoint}");
                 _ = Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
             }
         }
@@ -84,7 +84,7 @@ namespace SocketServer_Winform
                 // 新用户第一条消息必定是注册昵称，因此单独处理
                 int userName_num = client.Receive(buffer);
                 clients.Add(client, Encoding.UTF8.GetString(buffer, 0, userName_num));
-                AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已注册");
+                AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已注册");
                 _ = Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]})已注册", client)); // 广播消息，异步执行防止阻塞线程
 
                 while (true)
@@ -94,15 +94,15 @@ namespace SocketServer_Winform
                     if (num == 0) // num 为 0 说明客户端已断开连接
                         break;
                     string message = Encoding.UTF8.GetString(buffer, 0, num);
-                    AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{message}");
+                    AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{message}");
                     _ = Task.Run(() => Boardcast($"{client.RemoteEndPoint}({clients[client]}):{message}", client)); // 广播消息，异步执行防止阻塞线程
                 }
             }
             catch (Exception ex)
             {
                 // 客户端异常断开连接
-                AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{ex.Message}");
-                AppentMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已离开");
+                AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{ex.Message}");
+                AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已离开");
                 await Boardcast($"{client.RemoteEndPoint}({clients[client]})已离开", client);// 需等待广播完成否则会出现异常
                 clients.Remove(client);
             }
@@ -120,19 +120,19 @@ namespace SocketServer_Winform
             }
             catch (Exception ex)
             {
-                AppentMsgText_Fast($"广播失败：{ex.Message}({sender.RemoteEndPoint})");
+                AppendMsgText_Fast($"广播失败：{ex.Message}({sender.RemoteEndPoint})");
             }
         }
         private void materialRaisedButton1_Click(object sender, EventArgs e)
         {
             string msg = materialSingleLineTextField1.Text;
-            AppentMsgText_Fast(msg);
+            AppendMsgText_Fast(msg);
             materialSingleLineTextField1.Text = "";
             materialSingleLineTextField1.Focus();
             _ = Task.Run(() => Boardcast($"Server:{msg}", null));
         }
         // 由于无法跨线程操作控件，因此使用委托代理控件操作
-        internal static void AppentMsgText(string msg)
+        internal static void AppendMsgText(string msg)
         {
             if (msgTextBox.InvokeRequired)
             {
@@ -147,9 +147,9 @@ namespace SocketServer_Winform
             }
         }
         // 追加文字的快速方法，不需要额外写 Task.Run
-        internal static void AppentMsgText_Fast(string msg)
+        internal static void AppendMsgText_Fast(string msg)
         {
-            Task.Run(() => AppentMsgText(msg));
+            Task.Run(() => AppendMsgText(msg));
         }
         // 锁定布局大小，实现方式较粗糙
         private void Form1_SizeChanged(object sender, EventArgs e)

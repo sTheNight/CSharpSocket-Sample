@@ -37,7 +37,7 @@ namespace SocketClient_Winform
             addressTextBox = materialSingleLineTextField2;
             portTextBox = materialSingleLineTextField3;
 
-            AppentMsgText_Fast("未连接到服务端");
+            AppendMsgText_Fast("未连接到服务端");
         }
         private static async Task<bool> Connect(string ip, int port)
         {
@@ -47,7 +47,7 @@ namespace SocketClient_Winform
                 Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 if (Client == null)
                 {
-                    AppentMsgText_Fast("客户端启动失败");
+                    AppendMsgText_Fast("客户端启动失败");
                     return false;
                 }
                 await Client.ConnectAsync(ip, port);
@@ -56,7 +56,7 @@ namespace SocketClient_Winform
             }
             catch (Exception ex)
             {
-                AppentMsgText_Fast($"连接失败：{ex.Message}");
+                AppendMsgText_Fast($"连接失败：{ex.Message}");
                 return false;
             }
         }
@@ -72,12 +72,12 @@ namespace SocketClient_Winform
                     if (num == 0)
                         break;
                     string message = Encoding.UTF8.GetString(buffer, 0, num);
-                    AppentMsgText_Fast(message);
+                    AppendMsgText_Fast(message);
                 }
             }
             catch (Exception ex)
             {
-                AppentMsgText_Fast($"无法接收到信息，连接已断开：{ex.Message}");
+                AppendMsgText_Fast($"无法接收到信息，连接已断开：{ex.Message}");
                 Client.Close();
                 MessageBox.Show("连接已断开，点按确认后应用将重启");
                 RestartClient();
@@ -92,7 +92,7 @@ namespace SocketClient_Winform
             this.ClientSize = new System.Drawing.Size(width, height);
         }
 
-        internal static void AppentMsgText(string msg)
+        internal static void AppendMsgText(string msg)
         {
             if (msgTextBox.InvokeRequired)
             {
@@ -106,9 +106,9 @@ namespace SocketClient_Winform
                 msgTextBox.AppendText(msg + "\r\n");
             }
         }
-        internal static void AppentMsgText_Fast(string msg)
+        internal static void AppendMsgText_Fast(string msg)
         {
-            Task.Run(() => AppentMsgText(msg));
+            Task.Run(() => AppendMsgText(msg));
         }
 
         private async void materialFlatButton1_Click(object sender, EventArgs e)
@@ -116,18 +116,18 @@ namespace SocketClient_Winform
             if (Client==null)
             {
                 msgTextBox.Clear();
-                AppentMsgText_Fast("正在尝试连接服务端...");
+                AppendMsgText_Fast("正在尝试连接服务端...");
                 try
                 {
                     int port = int.Parse(portTextBox.Text);
                     if (port < 0 || port > 65535)
                     {
-                        AppentMsgText_Fast("端口号范围错误");
+                        AppendMsgText_Fast("端口号范围错误");
                         return;
                     }
                     if (addressTextBox.Text == "")
                     {
-                        AppentMsgText_Fast("IP地址为空");
+                        AppendMsgText_Fast("IP地址为空");
                         return;
                     }
                     if (await Connect(addressTextBox.Text, port))
@@ -139,7 +139,7 @@ namespace SocketClient_Winform
                         materialSingleLineTextField3.Enabled = false;
                         materialSingleLineTextField1.Focus();
                         materialSingleLineTextField1.Hint = "Please enter your nickname";
-                        AppentMsgText_Fast("已连接服务端，等待输入昵称...");
+                        AppendMsgText_Fast("已连接服务端，等待输入昵称...");
                         materialFlatButton1.Text = "Disconnect";
                         return;
                     }
@@ -148,7 +148,7 @@ namespace SocketClient_Winform
                 }
                 catch (Exception ex)
                 {
-                    AppentMsgText_Fast(ex.Message);
+                    AppendMsgText_Fast(ex.Message);
                     return;
                 }
             }
@@ -162,7 +162,7 @@ namespace SocketClient_Winform
         {
             if (Client == null)
             {
-                AppentMsgText_Fast("客户端未启动");
+                AppendMsgText_Fast("客户端未启动");
                 return;
             }
             try
@@ -172,19 +172,21 @@ namespace SocketClient_Winform
             }
             catch (Exception ex)
             {
-                AppentMsgText_Fast($"发送失败，连接已断开：{ex.Message}");
+                AppendMsgText_Fast($"发送失败，连接已断开：{ex.Message}");
                 Client.Close();
             }
 
             if (materialSingleLineTextField1.Hint == "Please enter your nickname")
             {
+                msgTextBox.Clear();
+                AppendMsgText_Fast("注册成功，您的昵称是：" + materialSingleLineTextField1.Text);
                 MessageBox.Show($"注册成功，您的昵称是：{materialSingleLineTextField1.Text}");
                 materialSingleLineTextField1.Hint = "Please enter your message";
                 materialSingleLineTextField1.Text = "";
                 _ = Task.Run(() => ReceiveMsg());
                 return;
             }
-            AppentMsgText_Fast($"You:{materialSingleLineTextField1.Text}");
+            AppendMsgText_Fast($"You:{materialSingleLineTextField1.Text}");
             materialSingleLineTextField1.Text = "";
             materialSingleLineTextField1.Focus();
         }
