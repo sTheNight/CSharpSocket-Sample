@@ -1,5 +1,5 @@
-## C# Socket ¿Í»§¶ËÓë·şÎñ¶ËµÄ¼òµ¥ÊµÀı
+## C# Socket å®¢æˆ·ç«¯ä¸æœåŠ¡ç«¯çš„ç®€å•å®ä¾‹
 
-²Î¿¼×Ô Bililbili UP£ºhttps://space.bilibili.com/251371905
+å‚è€ƒè‡ª Bililbili UPï¼šhttps://space.bilibili.com/251371905
 
-~~ÔÚ´Ë»ù´¡ÉÏ×öÁË´óÁ¿Âß¼­ÍêÉÆ~~ Ä¿Ç°ÒÑÓÃ Winform ×öÁË UI£¬²¢ÖØ×öÁË´ó²¿·ÖÂß¼­
+~~åœ¨æ­¤åŸºç¡€ä¸Šåšäº†å¤§é‡é€»è¾‘å®Œå–„~~ ç›®å‰å·²ç”¨ Winform + [MaterialSkin](https://github.com/IgnaceMaes/MaterialSkin) åšäº† UIï¼Œå¹¶é‡åšäº†å¤§éƒ¨åˆ†é€»è¾‘
