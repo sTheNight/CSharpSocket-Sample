@@ -51,7 +51,7 @@ namespace SocketClient_Winform
             }
             catch (Exception ex)
             {
-                AppendMsgText_Fast($"连接失败：{ex.Message}");
+                AppendMsgText_Fast($"连接失败: {ex.Message}");
                 return false;
             }
         }
@@ -73,7 +73,7 @@ namespace SocketClient_Winform
             catch (Exception ex)
             {
                 // 在接收信息时发生异常，说明连接已断开
-                AppendMsgText_Fast($"无法接收到信息，连接已断开：{ex.Message}");
+                AppendMsgText_Fast($"无法接收到信息，连接已断开: {ex.Message}");
                 Client.Close();
                 MessageBox.Show("连接已断开，点按确认后应用将重启");
                 Application.Restart();
@@ -147,9 +147,14 @@ namespace SocketClient_Winform
                     Client.Close();
                     Client = null;
                 }
+                catch(FormatException)
+                {
+                    AppendMsgText_Fast("端口号格式错误");
+                    return;
+                }
                 catch (Exception ex)
                 {
-                    AppendMsgText_Fast(ex.Message);
+                    AppendMsgText_Fast($"{ex.Source}:{ex.Message}");
                     return;
                 }
             }
@@ -171,8 +176,21 @@ namespace SocketClient_Winform
             try
             {
                 // 发送信息
-                string msg = materialSingleLineTextField1.Text;
-                _ = Task.Run(() => Client.Send(Encoding.UTF8.GetBytes(msg)));
+                string err_msg = materialSingleLineTextField1.Text;
+                if (err_msg!="")
+                {
+                    _ = Task.Run(() => Client.Send(Encoding.UTF8.GetBytes(err_msg)));
+                }
+                else
+                {
+                    AppendMsgText_Fast("发送失败: 信息为空");
+                    return;
+                }
+            }
+            catch(ArgumentException ex)
+            {
+                AppendMsgText_Fast($"无效参数: {ex.Message}");
+                return;
             }
             catch (Exception ex)
             {
@@ -184,14 +202,14 @@ namespace SocketClient_Winform
             if (materialSingleLineTextField1.Hint == "Please enter your nickname")
             {
                 msgTextBox.Clear();
-                AppendMsgText_Fast("注册成功，您的昵称是：" + materialSingleLineTextField1.Text);
-                MessageBox.Show($"注册成功，您的昵称是：{materialSingleLineTextField1.Text}");
+                AppendMsgText_Fast("注册成功，您的昵称是: " + materialSingleLineTextField1.Text);
+                MessageBox.Show($"注册成功，您的昵称是: {materialSingleLineTextField1.Text}");
                 materialSingleLineTextField1.Hint = "Please enter your message";
                 materialSingleLineTextField1.Text = "";
                 _ = Task.Run(() => ReceiveMsg()); // 开始接收信息
                 return;
             }
-            AppendMsgText_Fast($"You:{materialSingleLineTextField1.Text}");
+            AppendMsgText_Fast($"You: {materialSingleLineTextField1.Text}");
             materialSingleLineTextField1.Text = "";
             materialSingleLineTextField1.Focus();
         }

@@ -71,7 +71,7 @@ namespace SocketServer_Winform
             {
 
                 Socket client = await Server.AcceptAsync(); // 等待客户端连接
-                AppendMsgText_Fast($"监听到新的用户尝试连接：{client.RemoteEndPoint}");
+                AppendMsgText_Fast($"监听到新的用户尝试连接: {client.RemoteEndPoint}");
                 _ = Task.Run(() => ReceiveMsg(client)); // 异步执行接收消息的 Task
             }
         }
@@ -100,7 +100,7 @@ namespace SocketServer_Winform
             catch (Exception ex)
             {
                 // 客户端异常断开连接
-                AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}):{ex.Message}");
+                AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]}): {ex.Message}");
                 AppendMsgText_Fast($"{client.RemoteEndPoint}({clients[client]})已离开");
                 await Boardcast($"{client.RemoteEndPoint}({clients[client]})已离开", client);// 需等待广播完成否则会出现异常
                 clients.Remove(client);
@@ -108,6 +108,12 @@ namespace SocketServer_Winform
         }
         private static async Task Boardcast(string message, Socket sender) // 广播消息的Task，由于部分场景需要等待广播完成因此是 async 方法
         {
+            if (message == "")
+            {
+                string msg = sender == null ? "服务端发送内容为空" : $"{sender.RemoteEndPoint}发送内容为空";
+                AppendMsgText_Fast($"广播失败，{msg}");
+                return;
+            }
             try
             {
                 byte[] buffer = Encoding.UTF8.GetBytes(message);
@@ -119,7 +125,7 @@ namespace SocketServer_Winform
             }
             catch (Exception ex)
             {
-                AppendMsgText_Fast($"广播失败：{ex.Message}({sender.RemoteEndPoint})");
+                AppendMsgText_Fast($"广播失败: {ex.Message}({sender.RemoteEndPoint})");
             }
         }
         // 由于无法跨线程操作控件，因此使用委托代理控件操作
@@ -207,11 +213,16 @@ ProtocolType: {Server.ProtocolType}");
         private void materialRaisedButton1_Click(object sender, EventArgs e)
         {
             string msg = materialSingleLineTextField1.Text;
-            AppendMsgText_Fast(msg);
+            if (msg == "")
+            {
+                AppendMsgText_Fast("发送失败: 信息为空");
+                return;
+            }
+            AppendMsgText_Fast($"Server: {msg}");
             materialSingleLineTextField1.Text = "";
             materialSingleLineTextField1.Focus();
             // 使用广播方法来发送信息，以免重复造轮子
-            _ = Task.Run(() => Boardcast($"Server:{msg}", null));
+            _ = Task.Run(() => Boardcast($"Server: {msg}", null));
         }
     }
 }
